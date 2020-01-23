@@ -1,42 +1,53 @@
 `timescale 1ns / 1ps
 
-module myalutb;
+////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer:Marios Nicolaides
+//
+// Create Date:   19:07:28 01/23/2020
+// Design Name:   fixedFloatConversion
+// Module Name:   /home/ise/Desktop/CS161L/mnico005_lab2/fixedFloatConversion_tb.v
+// Project Name:  mnico005_lab2
+// Target Device:  
+// Tool versions:  
+// Description: 
+//
+// Verilog Test Fixture created by ISE for module: fixedFloatConversion
+//
+// Dependencies:
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+////////////////////////////////////////////////////////////////////////////////
 
-    parameter NUMBITS = 8 ;
+module fixedFloatConversion_tb;
 
 	// Inputs
-	reg clk ;
-	reg reset ; 
-	reg [NUMBITS-1:0] A;
-	reg [NUMBITS-1:0] B;
-	reg [2:0] opcode;
+	reg clk;
+	reg rst;
+	reg [31:0] targetnumber;
+	reg [4:0] fixpointpos;
+	reg opcode;
 
 	// Outputs
-	
-	wire [NUMBITS-1:0] result;
-	reg [NUMBITS-1:0] R ;
-	wire carryout;
-	wire overflow;
-	wire zero;
+	wire [31:0] result;
+	reg  [31:0] R;
 
-   // -------------------------------------------------------
 	// Instantiate the Unit Under Test (UUT)
-	// -------------------------------------------------------
-	
-	my_alu #(NUMBITS) uut (
-	   .clk(clk),
-		.reset(reset) ,  
-		.A(A), 
-		.B(B), 
+	fixedFloatConversion uut (
+		.clk(clk), 
+		.rst(rst), 
+		.targetnumber(targetnumber), 
+		.fixpointpos(fixpointpos), 
 		.opcode(opcode), 
-		.result(result), 
-		.carryout(carryout), 
-		.overflow(overflow), 
-		.zero(zero)
+		.result(result)
 	);
 
-    initial begin 
-        // Initialize inputs
+	initial begin
+		// Initialize Inputs
+		 // Initialize inputs
         clk = 0; // Clear clock
         rst = 0; // Clear reset
 
@@ -54,324 +65,142 @@ module myalutb;
         end
     end
 
-    integer totalTests = 0;
+        
+	 integer totalTests = 0;
     integer failedTests = 0;
     initial begin
-        // Initialize inputs
-
-        // Wait 100 ns for global reset to finish
-        #100;
-
-        // Wait for reset to finish
-        #10
-
+        
         // Test:
 		  // ---------------------------------------------
-		  // Testing unsigned additions 
-		  // --------------------------------------------- 
-		  opcode = 3'b000 ; 
-        $write("Test case 1: <Description>...");
+		  // Testing fix to float 
+		  // ---------------------------------------------
+		  $write("Test case 1: negative greater than -1");
         totalTests = totalTests + 1;
-        // Set input values
-		   
-		  A = 8'hFF ;
-   	  B = 8'h01 ;
-		  R = 8'h00 ; 
-		
-        #10;
+		  opcode = 0;
+		  targetnumber = -32;
+		  fixpointpos = 7;
+		  R = 32'b10111110100000000000000000000000;
+		  #10;
         // Check if result != expected
-        if ( result != R  || zero != 1'b1 || carryout != 1'b1) begin 
+        if ( result != R  ) begin 
             $display("...failed");
-            failedtests += 1;
+            failedtests = failedtests + 1;
         end else begin
             $display("...passed");
         end
 		  
-		  $write("Test case 2: <Description>...");
+		  $write("Test case 2: negative less than -1");
         totalTests = totalTests + 1;
-        // Set input values
-		   
-		  A = 8'h00 ;
-   	  B = 8'h01 ;
-		  R = 8'h01 ; 
-		
-        #10;
+		  opcode = 0;
+		  targetnumber = -16016;
+		  fixpointpos = 7;
+		  R = 32'b11000010111110100000000000000000;
+		  #10;
         // Check if result != expected
-        if ( result != R  || zero != 1'b0 || carryout != 1'b0) begin 
+        if ( result != R  ) begin 
             $display("...failed");
-            failedtests += 1;
+            failedtests = failedtests + 1;
+        end else begin
+            $display("...passed");
+        end
+		  
+		  $write("Test case 3: positive greater than 1");
+        totalTests = totalTests + 1;
+		  opcode = 0;
+		  targetnumber = 1056;
+		  fixpointpos = 7;
+		  R = 32'b01000001000001000000000000000000;
+		  #10;
+        // Check if result != expected
+        if ( result != R  ) begin 
+            $display("...failed");
+            failedtests = failedtests + 1;
+        end else begin
+            $display("...passed");
+        end
+		  
+		  $write("Test case 4: positive less than 1");
+        totalTests = totalTests + 1;
+		  opcode = 0;
+		  targetnumber = 16;
+		  fixpointpos = 7;
+		  R = 32'b0111110000000000000000000000000;
+		  #10;
+        // Check if result != expected
+        if ( result != R  ) begin 
+            $display("...failed");
+            failedtests = failedtests + 1;
         end else begin
             $display("...passed");
         end
 		  
 		  // ---------------------------------------------
-		  // Testing unsigned subs 
-		  // --------------------------------------------- 
-		  opcode = 3'b001 ; 
-        $write("Test case 3: <Description>...");
-        totalTests = totalTests + 1;
-        // Set input values
-		   
-		  A = 8'h00 ;
-   	  B = 8'h01 ;
-		  R = 8'hFF ; 
-		
-        #10;
-        // Check if result != expected
-        if ( result != R  || zero != 1'b0 || carryout != 1'b0) begin 
-            $display("...failed");
-            failedtests += 1;
-        end else begin
-            $display("...passed");
-        end
-		  
-		  $write("Test case 4: <Description>...");
-        totalTests = totalTests + 1;
-        // Set input values
-		   
-		  A = 8'hFF ;
-   	  B = 8'hFF ;
-		  R = 8'h00 ; 
-		
-        #10;
-        // Check if result != expected
-        if ( result != R  || zero != 1'b1 || carryout != 1'b0) begin 
-            $display("...failed");
-            failedtests += 1;
-        end else begin
-            $display("...passed");
-        end
-		  
+		  // Testing fix to float 
 		  // ---------------------------------------------
-		  // Testing signed adds 
-		  // ---------------------------------------------
-        opcode = 3'b010 ; 
-        $write("Test case 5: <Description>...");
+		  $write("Test case 5: negative greater than -1");
         totalTests = totalTests + 1;
-        // Set input values
-		   
-		  A = 8'h7F ;
-   	  B = 8'h01 ;
-		  R = 8'h80 ; 
-		
-        #10;
+		  opcode = 1;
+		  targetnumber = 32'b10111110100000000000000000000000;
+		  fixpointpos = 7;
+		  R = -32;
+		  #10;
         // Check if result != expected
-        if ( result != R  || zero != 1'b0 || overflow != 1'b1) begin 
+        if ( result != R  ) begin 
             $display("...failed");
-            failedtests += 1;
+            failedtests = failedtests + 1;
         end else begin
             $display("...passed");
         end
 		  
-		  $write("Test case 6: <Description>...");
+		  $write("Test case 6: negative less than -1");
         totalTests = totalTests + 1;
-        // Set input values
-		   
-		  A = 8'hF0 ;
-   	  B = 8'h80 ;
-		  R = 8'h70 ; 
-		
-        #10;
+		  opcode = 1;
+		  targetnumber = 32'b11000010111110100000000000000000;
+		  fixpointpos = 7;
+		  R = -16016;
+		  #10;
         // Check if result != expected
-        if ( result != R  || zero != 1'b0 || overflow != 1'b1) begin 
+        if ( result != R  ) begin 
             $display("...failed");
-            failedtests += 1;
+            failedtests = failedtests + 1;
         end else begin
             $display("...passed");
         end
 		  
-		  // ---------------------------------------------
-		  // Testing ANDS 
-		  // ---------------------------------------------
-		  opcode = 3'b100 ; 
-        $write("Test case 7: <Description>...");
+		  $write("Test case 7: positive greater than 1");
         totalTests = totalTests + 1;
-        // Set input values
-		   
-		  A = 8'h00 ;
-   	  B = 8'hFF ;
-		  R = 8'h00 ; 
-		
-        #10;
+		  opcode = 1;
+		  targetnumber = 32'b01000001000001000000000000000000;
+		  fixpointpos = 7;
+		  R = 1056;
+		  #10;
         // Check if result != expected
-        if ( result != R  || zero != 1'b1 ) begin 
+        if ( result != R  ) begin 
             $display("...failed");
-            failedtests += 1;
+            failedtests = failedtests + 1;
         end else begin
             $display("...passed");
         end
 		  
-		  $write("Test case 8: <Description>...");
+		  $write("Test case 8: positive less than 1");
         totalTests = totalTests + 1;
-        // Set input values
-		   
-		  A = 8'hFF ;
-   	  B = 8'hFF ;
-		  R = 8'h00 ; 
-		
-        #10;
+		  opcode = 1;
+		  targetnumber = 32'b0111110000000000000000000000000;
+		  fixpointpos = 7;
+		  R = 16;
+		  #10;
         // Check if result != expected
-        if ( result != R  || zero != 1'b0 ) begin 
+        if ( result != R  ) begin 
             $display("...failed");
-            failedtests += 1;
+            failedtests = failedtests + 1;
         end else begin
             $display("...passed");
         end
 		  
-		  // ----------------------------------------
-		  // ORs 
-		  // ----------------------------------------
-		  
-		  opcode = 3'b101 ; 
-        $write("Test case 9: <Description>...");
-        totalTests = totalTests + 1;
-        // Set input values
-		   
-		  A = 8'h00 ;
-   	  B = 8'hFF ;
-		  R = 8'hFF ; 
-		
-        #10;
-        // Check if result != expected
-        if ( result != R  || zero != 1'b0 ) begin 
-            $display("...failed");
-            failedtests += 1;
-        end else begin
-            $display("...passed");
-        end
-		  
-		  $write("Test case 10: <Description>...");
-        totalTests = totalTests + 1;
-        // Set input values
-		   
-		  A = 8'h00 ;
-   	  B = 8'h00 ;
-		  R = 8'h00 ; 
-		
-        #10;
-        // Check if result != expected
-        if ( result != R  || zero != 1'b1 ) begin 
-            $display("...failed");
-            failedtests += 1;
-        end else begin
-            $display("...passed");
-        end
-		  
-		  $write("Test case 11: <Description>...");
-        totalTests = totalTests + 1;
-        // Set input values
-		   
-		  A = 8'hFF ;
-   	  B = 8'hFF ;
-		  R = 8'hFF ; 
-		
-        #10;
-        // Check if result != expected
-        if ( result != R  || zero != 1'b0 ) begin 
-            $display("...failed");
-            failedtests += 1;
-        end else begin
-            $display("...passed");
-        end
-		  
-		  // ----------------------------------------
-		  // XORs 
-		  // ----------------------------------------
-		  
-		  opcode = 3'b110 ; 
-        $write("Test case 12: <Description>...");
-        totalTests = totalTests + 1;
-        // Set input values
-		   
-		  A = 8'h00 ;
-   	  B = 8'hFF ;
-		  R = 8'hFF ; 
-		
-        #10;
-        // Check if result != expected
-        if ( result != R  || zero != 1'b0 ) begin 
-            $display("...failed");
-            failedtests += 1;
-        end else begin
-            $display("...passed");
-        end
-		  
-		  $write("Test case 13: <Description>...");
-        totalTests = totalTests + 1;
-        // Set input values
-		   
-		  A = 8'h00 ;
-   	  B = 8'h00 ;
-		  R = 8'h00 ; 
-		
-        #10;
-        // Check if result != expected
-        if ( result != R  || zero != 1'b1 ) begin 
-            $display("...failed");
-            failedtests += 1;
-        end else begin
-            $display("...passed");
-        end
-		  
-		  $write("Test case 14: <Description>...");
-        totalTests = totalTests + 1;
-        // Set input values
-		   
-		  A = 8'hFF ;
-   	  B = 8'hFF ;
-		  R = 8'h00 ; 
-		
-        #10;
-        // Check if result != expected
-        if ( result != R  || zero != 1'b1 ) begin 
-            $display("...failed");
-            failedtests += 1;
-        end else begin
-            $display("...passed");
-        end
-		  
-		  // ----------------------------------------
-		  // Div 2 
-		  // ----------------------------------------
-		  opcode = 3'b111 ; 
-        $write("Test case 15: <Description>...");
-        totalTests = totalTests + 1;
-        // Set input values
-		   
-		  A = 8'hF0 ;
-   	  
-		  R = 8'h78 ; 
-		
-        #10;
-        // Check if result != expected
-        if ( result != R  || zero != 1'b0 ) begin 
-            $display("...failed");
-            failedtests += 1;
-        end else begin
-            $display("...passed");
-        end
-		  
-		  $write("Test case 15: <Description>...");
-        totalTests = totalTests + 1;
-        // Set input values
-		   
-		  A = 8'h01 ;
-   	  
-		  R = 8'h00 ; 
-		
-        #10;
-        // Check if result != expected
-        if ( result != R  || zero != 1'b1 ) begin 
-            $display("...failed");
-            failedtests += 1;
-        end else begin
-            $display("...passed");
-        end
-
-		  
-		  
-        $display("\n-----------------------------------------");
+		  $display("\n-----------------------------------------");
         $display("\nTesting complete\nPassed %d/%d tests", totalTests-failedTests,totalTests);
         $display("\n-----------------------------------------");
-    end
+	end
+      
 endmodule
+
