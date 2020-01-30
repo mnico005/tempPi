@@ -1,16 +1,17 @@
 `timescale 1ns / 1ps
-///////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////
 module fixedFloatConversion(
   input wire clk, 
-  input wire rst, 
+  input wire rst , 
   input wire[31:0] targetnumber, 
-  input wire[4:0] fixpointpos, 
-  input wire opcode, // 1 is float to fix, 0 is fix to float
-  output reg[31:0] result);
+  input wire[4:0] fixpointpos , 
+  input wire opcode , 
+  output reg[31:0] result );
 
-reg [31:0] floatresult;
-reg [31:0] fixresult; 
+reg [31:0] floatresult ; 
+reg [31:0] fixresult ; 
+
 
 reg [1:0] signBit;
 reg [31:0] targetnumberCopy;
@@ -20,10 +21,17 @@ integer first1Pos;
 reg [22:0] fraction; 
 integer foundFirstOne;
 
-always @ (posedge clk) begin
-	if (opcode == 0) begin
-		
-		
+
+reg sign = 0;  
+integer exp2;
+reg [31:0] temp; 
+
+always @(*) begin 
+	floatresult= 32'h0;
+	fixresult=32'h0;
+
+	case (opcode) 
+	1'b00: begin
 		foundFirstOne = 0;
 		first1Pos = 999;
 		targetnumberCopy = targetnumber;
@@ -53,24 +61,44 @@ always @ (posedge clk) begin
 			fraction = targetnumberCopy[31:8];		
 		end
 		
-		result = {signBit, exponent, fraction};
+		floatresult = {signBit, exponent, fraction};
 	end
-end
-
-	
+// -------------------------------------------
+// From fix to float (Part 1)
+// -------------------------------------------
+// Your  Implementation 
 
 // -------------------------------------------	
 // From float to fix (Part 2)
 // -------------------------------------------
 // Your  Implementation  
+	1'b01: begin 
+				
+		sign = targetnumber[31];
+		exp2 = targetnumber[30:23] - 127;
+		temp = 1;
+		temp[23] = 1;
+		temp[22:0] = targetnumber[22:0];
+		temp = temp >> (23 - (fixpointpos + exp2));
+		
+		if (sign == 1'b1) begin 
+			temp=-temp;
+		end
+		
+		fixresult= temp; 
+  
+  end 
+  
+  endcase
+  end
 
 // -------------------------------------------	
 // Register the results 
 // -------------------------------------------
 
-//always @ ( posedge clk ) begin 
-//    // synchronous reset
-//    result <= opcode == 1 ?  fixresult : floatresult ;
-//end 
+always @ ( posedge clk ) begin 
+    // Synchronous reset
+    result <= opcode == 1 ?  fixresult : floatresult ;
 
+end 
 endmodule
