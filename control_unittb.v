@@ -2,17 +2,17 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 // Company: 
-// Engineer:Marios Nicolaides
+// Engineer:
 //
-// Create Date:   19:07:28 01/23/2020
-// Design Name:   fixedFloatConversion
-// Module Name:   /home/ise/Desktop/CS161L/mnico005_lab2/fixedFloatConversion_tb.v
-// Project Name:  mnico005_lab2
+// Create Date:   21:22:09 01/30/2020
+// Design Name:   control_unit
+// Module Name:   /home/ise/Desktop/CS161L/lab3/control_unittb.v
+// Project Name:  lab3
 // Target Device:  
 // Tool versions:  
 // Description: 
 //
-// Verilog Test Fixture created by ISE for module: fixedFloatConversion
+// Verilog Test Fixture created by ISE for module: control_unit
 //
 // Dependencies:
 // 
@@ -22,185 +22,118 @@
 // 
 ////////////////////////////////////////////////////////////////////////////////
 
-module fixedFloatConversion_tb;
+module control_unittb;
 
 	// Inputs
-	reg clk;
-	reg rst;
-	reg [31:0] targetnumber;
-	reg [4:0] fixpointpos;
-	reg opcode;
+	reg [5:0] instr_op;
 
 	// Outputs
-	wire [31:0] result;
-	reg  [31:0] R;
+	wire reg_dst;
+	wire branch;
+	wire mem_read;
+	wire mem_to_reg;
+	wire [1:0] alu_op;
+	wire mem_write;
+	wire alu_src;
+	wire reg_write;
 
 	// Instantiate the Unit Under Test (UUT)
-	fixedFloatConversion uut (
-		.clk(clk), 
-		.rst(rst), 
-		.targetnumber(targetnumber), 
-		.fixpointpos(fixpointpos), 
-		.opcode(opcode), 
-		.result(result)
+	control_unit uut (
+		.instr_op(instr_op), 
+		.reg_dst(reg_dst), 
+		.branch(branch), 
+		.mem_read(mem_read), 
+		.mem_to_reg(mem_to_reg), 
+		.alu_op(alu_op), 
+		.mem_write(mem_write), 
+		.alu_src(alu_src), 
+		.reg_write(reg_write)
 	);
 
 	initial begin
 		// Initialize Inputs
-		 // Initialize inputs
-        clk = 0; // Clear clock
-        rst = 0; // Clear reset
+		instr_op = 0;
+
+		// Wait 100 ns for global reset to finish
+		#100;
+        
+		// Add stimulus here
+		forever begin 
+            #5 clk = ~clk;
+      end
+
+
+	end
+   integer totalTests = 0;
+    integer failedTests = 0;
+    initial begin
+        // Initialize inputs
 
         // Wait 100 ns for global reset to finish
         #100;
 
-        // Synchronous reset
-        rst = 1; clk = 0; #5
-        rst = 1; clk = 1; #5
-        rst = 0; clk = 0; #5
+        // Wait for reset to finish
+        #10
 
-        // Start the clock
-        forever begin 
-            #5 clk = ~clk;
-        end
-    end
-
-        
-	 integer totalTests = 0;
-    integer failedTests = 0;
-    initial begin
-        
         // Test:
 		  // ---------------------------------------------
-		  // Testing fix to float 
-		  // ---------------------------------------------
-		  $write("Test case 1: negative greater than -1");
-        totalTests = totalTests + 1;
-		  opcode = 0;
-		  targetnumber = -32;
-		  fixpointpos = 7;
-		  R = 32'b10111110100000000000000000000000;
-		  #10;
+		  // Testing unsigned additions 
+		  // --------------------------------------------- 
+		  instr_op = 6'b000000 ; 
+        $write("Test case 1: <Description>...");
+        totalTests = totalTests + 1; 
+		
+        #10;
         // Check if result != expected
-        if ( result != R  ) begin 
+        if (alu_op != 2'b10 || branch != 0 || mem_read != 0 || mem_write != 0 || reg_write!= 1 || mem_to_reg != 0 || alu_src != 0 || reg_dst != 1) begin 
             $display("...failed");
-            failedtests = failedtests + 1;
+            failedTests = failedTests + 1;
         end else begin
             $display("...passed");
-        end
+        end   
 		  
-		  $write("Test case 2: negative less than -1");
-        totalTests = totalTests + 1;
-		  opcode = 0;
-		  targetnumber = -16016;
-		  fixpointpos = 7;
-		  R = 32'b11000010111110100000000000000000;
-		  #10;
+		  instr_op = 6'b110001 ; 
+        $write("Test case 2: <Description>...");
+        totalTests = totalTests + 1; 
+		
+        #10;
         // Check if result != expected
-        if ( result != R  ) begin 
+        if (alu_op != 2'b00 || branch != 0 || mem_read != 1 || mem_write != 0 || reg_write!= 1 || mem_to_reg != 1 || alu_src != 1 || reg_dst != 0) begin 
             $display("...failed");
-            failedtests = failedtests + 1;
+            failedTests = failedTests + 1;
         end else begin
             $display("...passed");
-        end
+        end 
 		  
-		  $write("Test case 3: positive greater than 1");
-        totalTests = totalTests + 1;
-		  opcode = 0;
-		  targetnumber = 1056;
-		  fixpointpos = 7;
-		  R = 32'b01000001000001000000000000000000;
-		  #10;
+		  instr_op = 6'b110101 ; 
+        $write("Test case 3: <Description>...");
+        totalTests = totalTests + 1; 
+		
+        #10;
         // Check if result != expected
-        if ( result != R  ) begin 
+        if (alu_op != 2'b00 || branch != 0 || mem_read != 0 || mem_write != 1 || reg_write!= 0  || alu_src != 1 ) begin 
             $display("...failed");
-            failedtests = failedtests + 1;
+            failedTests = failedTests + 1;
         end else begin
             $display("...passed");
-        end
+        end 
 		  
-		  $write("Test case 4: positive less than 1");
-        totalTests = totalTests + 1;
-		  opcode = 0;
-		  targetnumber = 16;
-		  fixpointpos = 7;
-		  R = 32'b0111110000000000000000000000000;
-		  #10;
+		  instr_op = 6'b001000 ; 
+        $write("Test case 4: <Description>...");
+        totalTests = totalTests + 1; 
+		
+        #10;
         // Check if result != expected
-        if ( result != R  ) begin 
+        if (alu_op != 2'b01 || branch != 1 || mem_read != 0 || mem_write != 0 || reg_write!= 0  || alu_src != 0 ) begin 
             $display("...failed");
-            failedtests = failedtests + 1;
+            failedTests = failedTests + 1;
         end else begin
             $display("...passed");
-        end
-		  
-		  // ---------------------------------------------
-		  // Testing fix to float 
-		  // ---------------------------------------------
-		  $write("Test case 5: negative greater than -1");
-        totalTests = totalTests + 1;
-		  opcode = 1;
-		  targetnumber = 32'b10111110100000000000000000000000;
-		  fixpointpos = 7;
-		  R = -32;
-		  #10;
-        // Check if result != expected
-        if ( result != R  ) begin 
-            $display("...failed");
-            failedtests = failedtests + 1;
-        end else begin
-            $display("...passed");
-        end
-		  
-		  $write("Test case 6: negative less than -1");
-        totalTests = totalTests + 1;
-		  opcode = 1;
-		  targetnumber = 32'b11000010111110100000000000000000;
-		  fixpointpos = 7;
-		  R = -16016;
-		  #10;
-        // Check if result != expected
-        if ( result != R  ) begin 
-            $display("...failed");
-            failedtests = failedtests + 1;
-        end else begin
-            $display("...passed");
-        end
-		  
-		  $write("Test case 7: positive greater than 1");
-        totalTests = totalTests + 1;
-		  opcode = 1;
-		  targetnumber = 32'b01000001000001000000000000000000;
-		  fixpointpos = 7;
-		  R = 1056;
-		  #10;
-        // Check if result != expected
-        if ( result != R  ) begin 
-            $display("...failed");
-            failedtests = failedtests + 1;
-        end else begin
-            $display("...passed");
-        end
-		  
-		  $write("Test case 8: positive less than 1");
-        totalTests = totalTests + 1;
-		  opcode = 1;
-		  targetnumber = 32'b0111110000000000000000000000000;
-		  fixpointpos = 7;
-		  R = 16;
-		  #10;
-        // Check if result != expected
-        if ( result != R  ) begin 
-            $display("...failed");
-            failedtests = failedtests + 1;
-        end else begin
-            $display("...passed");
-        end
+        end 
 		  
 		  $display("\n-----------------------------------------");
         $display("\nTesting complete\nPassed %d/%d tests", totalTests-failedTests,totalTests);
         $display("\n-----------------------------------------");
-	end
-      
+	end 
 endmodule
 
