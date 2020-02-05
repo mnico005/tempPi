@@ -1,25 +1,6 @@
 `timescale 1ns / 1ps
 
 ////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer:
-//
-// Create Date:   21:22:09 01/30/2020
-// Design Name:   control_unit
-// Module Name:   /home/ise/Desktop/CS161L/lab3/control_unittb.v
-// Project Name:  lab3
-// Target Device:  
-// Tool versions:  
-// Description: 
-//
-// Verilog Test Fixture created by ISE for module: control_unit
-//
-// Dependencies:
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
 ////////////////////////////////////////////////////////////////////////////////
 
 module control_unittb;
@@ -50,28 +31,12 @@ module control_unittb;
 		.reg_write(reg_write)
 	);
 
-	initial begin
-		// Initialize Inputs
-		instr_op = 0;
-
-		// Wait 100 ns for global reset to finish
-		#100;
-        
-		// Add stimulus here
-		forever begin 
-            #5 clk = ~clk;
-      end
-
-
-	end
+	
    integer totalTests = 0;
     integer failedTests = 0;
     initial begin
         // Initialize inputs
-
-        // Wait 100 ns for global reset to finish
-        #100;
-
+			instr_op = 0;
         // Wait for reset to finish
         #10
 
@@ -92,7 +57,7 @@ module control_unittb;
             $display("...passed");
         end   
 		  
-		  instr_op = 6'b110001 ; 
+		  instr_op = 6'b100011 ; 
         $write("Test case 2: <Description>...");
         totalTests = totalTests + 1; 
 		
@@ -105,7 +70,7 @@ module control_unittb;
             $display("...passed");
         end 
 		  
-		  instr_op = 6'b110101 ; 
+		  instr_op = 6'b101011 ; 
         $write("Test case 3: <Description>...");
         totalTests = totalTests + 1; 
 		
@@ -118,7 +83,7 @@ module control_unittb;
             $display("...passed");
         end 
 		  
-		  instr_op = 6'b001000 ; 
+		  instr_op = 6'b000100 ; 
         $write("Test case 4: <Description>...");
         totalTests = totalTests + 1; 
 		
