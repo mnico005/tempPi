@@ -1,76 +1,44 @@
 `timescale 1ns / 1ps
-///////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////
-module fixedFloatConversion(
-  input wire clk, 
-  input wire rst, 
-  input wire[31:0] targetnumber, 
-  input wire[4:0] fixpointpos, 
-  input wire opcode, // 1 is float to fix, 0 is fix to float
-  output reg[31:0] result);
+//////////////////////////////////////////////////////////////////////////////////
 
-reg [31:0] floatresult;
-reg [31:0] fixresult; 
-
-reg [1:0] signBit;
-reg [31:0] targetnumberCopy;
-reg[7:0] exponent; 
-integer index;
-integer first1Pos;
-reg [22:0] fraction; 
-integer foundFirstOne;
-
-always @ (posedge clk) begin
-	if (opcode == 0) begin
-		
-		
-		foundFirstOne = 0;
-		first1Pos = 999;
-		targetnumberCopy = targetnumber;
-		signBit = targetnumberCopy[31];
-		
-		if (signBit == 1) begin
-			targetnumberCopy = (~targetnumberCopy) + 1;
+//////////////////////////////////////////////////////////////////////////////////
+module alu_control  (
+    input wire [1:0] alu_op , 
+    input wire [5:0] instruction_5_0 , 
+    output reg [3:0] alu_out  
+    );
+	
+	
+always @(*)	begin
+	case (alu_op) 
+		2'b00: begin
+			alu_out = 4'b0010;
 		end
-
-		for(index = 30; index >= 0; index = index - 1) begin
-		
-			if (targetnumberCopy[index] == 1 && foundFirstOne == 0) begin
-				exponent = index - fixpointpos + 127;
-				first1Pos = index;
-				foundFirstOne = 1;
+		2'b01: begin
+			alu_out = 4'b0110;
+		end
+		2'b10: begin
+			if (instruction_5_0 == 6'b100000) begin
+				alu_out = 4'b0010;
+			end
+			else if(instruction_5_0 == 6'b100010) begin
+				alu_out = 4'b0110;
+			end
+			else if(instruction_5_0 == 6'b100100) begin
+				alu_out = 4'b0000;
+			end
+			else if(instruction_5_0 == 6'b100101) begin
+				alu_out = 4'b0001;
+			end
+			else if(instruction_5_0 == 6'b100111) begin
+				alu_out = 4'b1100;
+			end
+			else if (instruction_5_0 == 6'b101010) begin
+				alu_out = 4'b0111;
 			end
 		end
-		
-		if(first1Pos == 999) begin
-			signBit = 0;
-			exponent = 0;
-			fraction = 0;
-		end
-		
-		else begin
-			targetnumberCopy = targetnumberCopy << (31-first1Pos);
-			fraction = targetnumberCopy[31:8];		
-		end
-		
-		result = {signBit, exponent, fraction};
-	end
+	endcase
 end
-
 	
-
-// -------------------------------------------	
-// From float to fix (Part 2)
-// -------------------------------------------
-// Your  Implementation  
-
-// -------------------------------------------	
-// Register the results 
-// -------------------------------------------
-
-//always @ ( posedge clk ) begin 
-//    // synchronous reset
-//    result <= opcode == 1 ?  fixresult : floatresult ;
-//end 
 
 endmodule
